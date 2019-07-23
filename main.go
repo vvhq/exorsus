@@ -26,7 +26,10 @@ func main() {
 	var logger = logging.NewLogger(os.Stdout, config.GetLogLevel())
 	loggerHook, err := logging.NewFileHook(logger, path.Join(path.Dir(config.GetLogPath()), configuration.DefaultLogFileName))
 	if err != nil {
-		logger.WithField("source", "main").WithField("error", err.Error()).Error("Can not set hook")
+		logger.
+			WithField("source", "main").
+			WithField("error", err.Error()).
+			Error("Can not set file hook")
 	} else {
 		logger.AddHook(loggerHook)
 	}
