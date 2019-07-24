@@ -47,7 +47,7 @@ func NewFileHook(parentLogger *logrus.Logger, logPath string) (*FileHook, error)
 	hostName, err := os.Hostname()
 	if err == nil {
 		logDirName, logFileName := filepath.Split(logPath)
-		logPath = path.Join(logDirName, fmt.Sprintf("%s-%s", hostName, logFileName))
+		logPath = path.Join(logDirName, fmt.Sprintf("%s_%s", hostName, logFileName))
 	} else {
 		return nil, err
 	}

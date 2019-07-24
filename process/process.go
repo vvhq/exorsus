@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -413,6 +414,11 @@ func (process *Process) findCredential() *syscall.Credential {
 
 func New(app *application.Application, status *status.Status, wg *sync.WaitGroup, config *configuration.Configuration, logger *logrus.Logger) *Process {
 	logPath := path.Join(path.Dir(config.LogPath), fmt.Sprintf("app_%s.json", app.Name))
+	hostName, err := os.Hostname()
+	if err == nil {
+		logDirName, logFileName := filepath.Split(logPath)
+		logPath = path.Join(logDirName, fmt.Sprintf("%s_%s", hostName, logFileName))
+	}
 	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		logFile = os.Stdout

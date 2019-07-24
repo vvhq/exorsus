@@ -69,3 +69,6 @@ func main() {
 		WithField("source", "main").
 		Info("Exorsus stopped")
 }
+
+//TODO: добавить тип запуска once (для certbot)
+
