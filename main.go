@@ -1,13 +1,13 @@
 package main
 
 import (
-	"exorsusevolution/application"
-	"exorsusevolution/configuration"
-	"exorsusevolution/logging"
-	"exorsusevolution/process"
-	"exorsusevolution/rest"
-	"exorsusevolution/signals"
-	"exorsusevolution/status"
+	"exorsus/application"
+	"exorsus/configuration"
+	"exorsus/logging"
+	"exorsus/process"
+	"exorsus/rest"
+	"exorsus/signals"
+	"exorsus/status"
 	"flag"
 	"os"
 	"os/signal"

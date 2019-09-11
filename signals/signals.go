@@ -1,8 +1,8 @@
 package signals
 
 import (
-	"exorsusevolution/process"
-	"exorsusevolution/rest"
+	"exorsus/process"
+	"exorsus/rest"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"os"

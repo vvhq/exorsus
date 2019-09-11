@@ -1,10 +1,10 @@
 package process
 
 import (
-	"exorsusevolution/application"
-	"exorsusevolution/configuration"
-	"exorsusevolution/logging"
-	"exorsusevolution/status"
+	"exorsus/application"
+	"exorsus/configuration"
+	"exorsus/logging"
+	"exorsus/status"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"io"

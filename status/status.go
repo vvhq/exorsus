@@ -1,7 +1,7 @@
 package status
 
 import (
-	"exorsusevolution/configuration"
+	"exorsus/configuration"
 	"fmt"
 	"sync"
 	"sync/atomic"
