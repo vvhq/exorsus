@@ -70,6 +70,4 @@ func main() {
 		Info("Exorsus stopped")
 }
 
-//TODO: добавить тип запуска once (для certbot)
-//TODO: добавить версионность и запрос версии через REST (и командную строку)
 
