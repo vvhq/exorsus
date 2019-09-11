@@ -7,6 +7,7 @@ import (
 	"exorsus/configuration"
 	"exorsus/process"
 	"exorsus/status"
+	"exorsus/version"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -41,6 +42,7 @@ func (service *Service) Start() {
 	router.HandleFunc("/actions/restart/{name}", service.restartApplication).Methods("GET")
 	router.HandleFunc("/status/", service.statusAll).Methods("GET")
 	router.HandleFunc("/status/{name}", service.status).Methods("GET")
+	router.HandleFunc("/version/", service.getVersion).Methods("GET")
 
 	service.server = &http.Server{Addr: fmt.Sprintf(":%d", service.port), Handler: router}
 	service.logger.
@@ -375,6 +377,24 @@ func (service *Service) status(responseWriter http.ResponseWriter, request *http
 		return
 	}
 	_, err = responseWriter.Write(jsonAppStatus)
+	if err != nil {
+		service.logger.
+			WithField("source", "rest").
+			WithField("error", err.Error()).
+			WithField("request", request.RequestURI).
+			Error("Response error")
+	} else {
+		service.logger.
+			WithField("source", "rest").
+			WithField("request", request.RequestURI).
+			Trace("Response success")
+	}
+}
+
+func (service *Service) getVersion(responseWriter http.ResponseWriter, request *http.Request) {
+	jsonVersion := fmt.Sprintf("{\"version\": \"%s\"}", version.Version)
+	responseWriter.Header().Set("Content-Type", "application/json")
+	_, err := responseWriter.Write([]byte(jsonVersion))
 	if err != nil {
 		service.logger.
 			WithField("source", "rest").
