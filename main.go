@@ -9,6 +9,7 @@ import (
 	"exorsus/signals"
 	"exorsus/status"
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"path"
@@ -16,9 +17,16 @@ import (
 	"syscall"
 )
 
+var version string //set during build
+
 func main() {
-	configDir := flag.String("config", "./config/", "Application directory path")
+	configDir := flag.String("config", "./config/", "application directory path")
+	printVersion := flag.Bool("version", false, "print version number")
 	flag.Parse()
+	if *printVersion {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 	configDirPath := path.Dir(*configDir)
 	configPath := path.Join(configDirPath, configuration.DefaultConfigurationFileName)
 	config := configuration.New(configPath)
