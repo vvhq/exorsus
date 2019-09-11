@@ -1,8 +1,11 @@
 package status
 
 import (
+	"exorsusevolution/configuration"
+	"fmt"
 	"sync"
 	"sync/atomic"
+	"time"
 )
 
 type IOStdStore struct {
@@ -12,6 +15,11 @@ type IOStdStore struct {
 }
 
 func (store *IOStdStore) Append(item string) {
+	item = fmt.Sprintf("%s%s%s %s",
+		configuration.DefaultStdDatePrefix,
+		time.Now().Format(configuration.DefaultStdDateLayout),
+		configuration.DefaultStdDateSuffix,
+		item)
 	store.lock.Lock()
 	defer store.lock.Unlock()
 	store.warehouse = append(store.warehouse, item)

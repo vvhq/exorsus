@@ -14,6 +14,9 @@ const DefaultConfigPath string = "./config/"
 const DefaultLogPath string = "./log/"
 const DefaultLogLevel string = "info"
 const DefaultStdLinesCount int = 500
+const DefaultStdDateLayout = "2006-01-02 15:04:05"
+const DefaultStdDatePrefix = "["
+const DefaultStdDateSuffix = "]"
 const DefaultShutdownTimeout int = 4
 const DefaultListenPort int = 5202
 const DefaultConfigurationFileName string = "config.json"
@@ -26,6 +29,9 @@ type Configuration struct {
 	StdLinesCount int
 	ShutdownTimeout int
 	ListenPort int
+	DateLayout string
+	DatePrefix string
+	DateSuffix string
 }
 
 func (config *Configuration) GetLogPath() string {
@@ -67,6 +73,9 @@ func (config *Configuration) applyDefaults() {
 	config.StdLinesCount = DefaultStdLinesCount
 	config.ShutdownTimeout = DefaultShutdownTimeout
 	config.ListenPort = DefaultListenPort
+	config.DateLayout = DefaultStdDateLayout
+	config.DatePrefix = DefaultStdDatePrefix
+	config.DateSuffix = DefaultStdDateSuffix
 	if _, err := os.Stat(DefaultConfigPath); os.IsNotExist(err) {
 		err := os.Mkdir(DefaultConfigPath, 0755)
 		if err != nil {
