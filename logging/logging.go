@@ -3,6 +3,7 @@ package logging
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"io"
 	"os"
 	"path"
@@ -11,6 +12,15 @@ import (
 
 type FileHook struct {
 	logger *logrus.Logger
+	lumberLogger *lumberjack.Logger
+	parentLogger *logrus.Logger
+}
+
+func (hook *FileHook) Rotate() {
+	err := hook.lumberLogger.Rotate()
+	if err != nil {
+		hook.parentLogger.Error(err.Error())
+	}
 }
 
 func (hook *FileHook) Levels() []logrus.Level {
@@ -39,7 +49,7 @@ func (hook *FileHook) Fire(entry *logrus.Entry) error {
 	return nil
 }
 
-func NewFileHook(parentLogger *logrus.Logger, logPath string) (*FileHook, error) {
+func NewFileHook(parentLogger *logrus.Logger, logPath string, maxSize int, maxBackups int, maxAge int, localTime bool) (*FileHook, error) {
 	fileLogger := logrus.New()
 	fileLogger.SetLevel(parentLogger.Level)
 	fileLogger.SetFormatter(&logrus.JSONFormatter{})
@@ -51,12 +61,15 @@ func NewFileHook(parentLogger *logrus.Logger, logPath string) (*FileHook, error)
 	} else {
 		return nil, err
 	}
-	logFile, err := os.OpenFile(logPath, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0644)
-	if err != nil {
-		return nil, err
+	lumberLogger := &lumberjack.Logger{
+		Filename:   logPath,
+		MaxSize:    maxSize,
+		MaxBackups: maxBackups,
+		MaxAge:     maxAge,
+		LocalTime:  localTime,
 	}
-	fileLogger.SetOutput(logFile)
-	return &FileHook{logger: fileLogger}, nil
+	fileLogger.SetOutput(lumberLogger)
+	return &FileHook{logger: fileLogger, lumberLogger: lumberLogger, parentLogger: parentLogger}, nil
 }
 
 func NewLogger(output io.Writer, level logrus.Level) *logrus.Logger {

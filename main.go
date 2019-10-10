@@ -11,9 +11,11 @@ import (
 	"exorsus/version"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/signal"
 	"path"
+	"strconv"
 	"sync"
 	"syscall"
 )
@@ -31,7 +33,12 @@ func main() {
 	config := configuration.New(configPath)
 
 	var logger = logging.NewLogger(os.Stdout, config.GetLogLevel())
-	loggerHook, err := logging.NewFileHook(logger, path.Join(path.Dir(config.GetLogPath()), configuration.DefaultLogFileName))
+	loggerHook, err := logging.NewFileHook(logger,
+		path.Join(path.Dir(config.GetLogPath()), configuration.DefaultLogFileName),
+		config.LogMaxSize,
+		config.LogMaxBackups,
+		config.LogMaxAge,
+		config.LogLocalTime)
 	if err != nil {
 		logger.
 			WithField("source", "main").
@@ -65,13 +72,26 @@ func main() {
 	restService.Start()
 	maxTimeout = maxTimeout + config.GetShutdownTimeout()
 	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR1, syscall.SIGHUP)
 	wg.Add(1)
-	go signals.HandleSignals(&wg, signalChan, procManager, restService, maxTimeout, logger)
+	go signals.HandleSignals(&wg, signalChan, procManager, restService, maxTimeout, config, logger, loggerHook)
 	logger.
 		WithField("source", "main").
-		Info("Exorsus stared")
+		Infof("Exorsus stared; Pid: %d", os.Getpid())
+	pidPath := path.Join(config.PidPath, config.PidFileName)
+	err = ioutil.WriteFile(pidPath, []byte(strconv.Itoa(os.Getpid())), 0644)
+	if err != nil {
+		logger.
+			WithField("source", "main").
+			Warnf("Can not write PID to file '%s'; Error: %s", pidPath, err.Error())
+	}
 	wg.Wait()
+	err = ioutil.WriteFile(pidPath, []byte(""), 0644)
+	if err != nil {
+		logger.
+			WithField("source", "main").
+			Warnf("Can not write PID to file '%s'; Error: %s", pidPath, err.Error())
+	}
 	logger.
 		WithField("source", "main").
 		Info("Exorsus stopped")

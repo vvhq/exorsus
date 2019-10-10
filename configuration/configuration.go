@@ -13,6 +13,10 @@ import (
 const DefaultConfigPath string = "./config/"
 const DefaultLogPath string = "./log/"
 const DefaultLogLevel string = "info"
+const DefaultLogMaxSize int = 10
+const DefaultLogMaxBackups int = 30
+const DefaultLogMaxAge int = 28
+const DefaultLogLocalTime bool = true
 const DefaultStdLinesCount int = 500
 const DefaultStdDateLayout = "2006-01-02 15:04:05"
 const DefaultStdDatePrefix = "["
@@ -22,16 +26,24 @@ const DefaultListenPort int = 5202
 const DefaultConfigurationFileName string = "config.json"
 const DefaultLogFileName string = "log.json"
 const DefaultApplicationsFileName string = "applications.json"
+const DefaultPidPath string = "/tmp/"
+const DefaultPidFileName string = "exorsus.pid"
 
 type Configuration struct {
 	LogPath string
 	LogLevel string
+	LogMaxSize int
+	LogMaxBackups int
+	LogMaxAge int
+	LogLocalTime bool
 	StdLinesCount int
 	ShutdownTimeout int
 	ListenPort int
 	DateLayout string
 	DatePrefix string
 	DateSuffix string
+	PidPath string
+	PidFileName string
 }
 
 func (config *Configuration) GetLogPath() string {
@@ -76,6 +88,12 @@ func (config *Configuration) applyDefaults() {
 	config.DateLayout = DefaultStdDateLayout
 	config.DatePrefix = DefaultStdDatePrefix
 	config.DateSuffix = DefaultStdDateSuffix
+	config.LogMaxSize = DefaultLogMaxSize
+	config.LogMaxBackups = DefaultLogMaxBackups
+	config.LogMaxAge = DefaultLogMaxAge
+	config.LogLocalTime = DefaultLogLocalTime
+	config.PidPath = DefaultPidPath
+	config.PidFileName =DefaultPidFileName
 	if _, err := os.Stat(DefaultConfigPath); os.IsNotExist(err) {
 		err := os.Mkdir(DefaultConfigPath, 0755)
 		if err != nil {
