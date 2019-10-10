@@ -1,8 +1,8 @@
 package status
 
 import (
-	"exorsus/configuration"
 	"fmt"
+	"github.com/vvhq/exorsus/configuration"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -40,7 +40,7 @@ func (store *IOStdStore) List() []string {
 	var warehouse []string
 	if len(store.warehouse) > store.max {
 		warehouse = make([]string, store.max)
-		copy(warehouse, store.warehouse[(len(store.warehouse) - store.max):])
+		copy(warehouse, store.warehouse[(len(store.warehouse)-store.max):])
 	} else {
 		warehouse = make([]string, len(store.warehouse))
 		copy(warehouse, store.warehouse)

@@ -3,14 +3,14 @@ package rest
 import (
 	"context"
 	"encoding/json"
-	"exorsus/application"
-	"exorsus/configuration"
-	"exorsus/process"
-	"exorsus/status"
-	"exorsus/version"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
+	"github.com/vvhq/exorsus/application"
+	"github.com/vvhq/exorsus/configuration"
+	"github.com/vvhq/exorsus/process"
+	"github.com/vvhq/exorsus/status"
+	"github.com/vvhq/exorsus/version"
 	"net/http"
 	"os"
 	"sync"
@@ -18,13 +18,13 @@ import (
 )
 
 type Service struct {
-	port int
-	store *application.Storage
-	proc *process.Manager
-	server *http.Server
+	port          int
+	store         *application.Storage
+	proc          *process.Manager
+	server        *http.Server
 	mainWaitGroup *sync.WaitGroup
-	config *configuration.Configuration
-	logger *logrus.Logger
+	config        *configuration.Configuration
+	logger        *logrus.Logger
 }
 
 func (service *Service) Start() {
@@ -72,7 +72,7 @@ func (service *Service) Stop() {
 	service.logger.
 		WithField("source", "rest").
 		Trace("Stopping REST")
-	ctx, _ := context.WithTimeout(context.Background(), 5 * time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	err := service.server.Shutdown(ctx)
 	if err != nil {
 		service.logger.

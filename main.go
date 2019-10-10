@@ -1,16 +1,16 @@
 package main
 
 import (
-	"exorsus/application"
-	"exorsus/configuration"
-	"exorsus/logging"
-	"exorsus/process"
-	"exorsus/rest"
-	"exorsus/signals"
-	"exorsus/status"
-	"exorsus/version"
 	"flag"
 	"fmt"
+	"github.com/vvhq/exorsus/application"
+	"github.com/vvhq/exorsus/configuration"
+	"github.com/vvhq/exorsus/logging"
+	"github.com/vvhq/exorsus/process"
+	"github.com/vvhq/exorsus/rest"
+	"github.com/vvhq/exorsus/signals"
+	"github.com/vvhq/exorsus/status"
+	"github.com/vvhq/exorsus/version"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -96,5 +96,3 @@ func main() {
 		WithField("source", "main").
 		Info("Exorsus stopped")
 }
-
-

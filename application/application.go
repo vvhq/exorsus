@@ -10,17 +10,17 @@ import (
 )
 
 type Environment struct {
-	Name string `json:"name"`
+	Name  string `json:"name"`
 	Value string `json:"value"`
 }
 
 type Application struct {
-	Name string               `json:"name"`
-	Command string            `json:"command"`
-	Arguments string          `json:"arguments"`
-	Timeout int               `json:"timeout"`
-	User string               `json:"user"`
-	Group string              `json:"group"`
+	Name        string        `json:"name"`
+	Command     string        `json:"command"`
+	Arguments   string        `json:"arguments"`
+	Timeout     int           `json:"timeout"`
+	User        string        `json:"user"`
+	Group       string        `json:"group"`
 	Environment []Environment `json:"environment"`
 }
 
@@ -39,9 +39,9 @@ func (app *Application) Copy() (*Application, error) {
 
 type Storage struct {
 	applications sync.Map
-	path string
-	lock sync.Mutex
-	logger *logrus.Logger
+	path         string
+	lock         sync.Mutex
+	logger       *logrus.Logger
 }
 
 func (store *Storage) Add(applicationConfiguration Application) error {
@@ -67,7 +67,7 @@ func (store *Storage) Update(name string, applicationConfiguration Application) 
 	return nil
 }
 
-func (store *Storage) Get(name string) (Application, bool){
+func (store *Storage) Get(name string) (Application, bool) {
 	rawApplication, ok := store.applications.Load(name)
 	if ok {
 		applicationConfiguration := rawApplication.(Application)

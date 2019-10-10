@@ -1,12 +1,12 @@
 package process
 
 import (
-	"exorsus/application"
-	"exorsus/configuration"
-	"exorsus/logging"
-	"exorsus/status"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"github.com/vvhq/exorsus/application"
+	"github.com/vvhq/exorsus/configuration"
+	"github.com/vvhq/exorsus/logging"
+	"github.com/vvhq/exorsus/status"
 	"io"
 	"os"
 	"os/exec"
@@ -69,7 +69,7 @@ func (process *Process) GetStdOut() []string {
 	return process.status.ListStdOutItems()
 }
 
-func (process *Process) GetStdErr() [] string {
+func (process *Process) GetStdErr() []string {
 	return process.status.ListStdErrItems()
 }
 
@@ -243,7 +243,7 @@ func (process *Process) start() {
 	process.status.SetPid(process.getCurrentPid())
 
 	err = process.command.Wait()
-	if  err != nil {
+	if err != nil {
 		process.status.SetExitCode(-1)
 		exitError, ok := err.(*exec.ExitError)
 		if ok {
@@ -311,7 +311,7 @@ func (process *Process) stop() {
 			WithField("code", fmt.Sprintf("%d", process.status.GetExitCode())).
 			WithField("error", err.Error()).
 			Error("Can not gracefully stop process")
-	}  else {
+	} else {
 		process.status.SetPid(process.getCurrentPid())
 		process.status.SetState(status.Stopped)
 		process.status.SetError(nil)
@@ -324,7 +324,7 @@ func (process *Process) stop() {
 			WithField("code", fmt.Sprintf("%d", process.status.GetExitCode())).
 			Trace("Process stopped successfully")
 	}
-	time.Sleep(time.Second * time.Duration(process.app.Timeout +10))
+	time.Sleep(time.Second * time.Duration(process.app.Timeout+10))
 	if process.status.GetState() != status.Stopped {
 		err := process.command.Process.Kill()
 		if err != nil {
@@ -395,7 +395,7 @@ func (process *Process) findCredential() *syscall.Credential {
 			}
 		}
 	}
-	if  process.app.Group != "" {
+	if process.app.Group != "" {
 		lookupGroup, err := user.LookupGroup(process.app.Group)
 		if err == nil {
 			lookupGid, err := strconv.Atoi(lookupGroup.Gid)
@@ -434,13 +434,13 @@ func New(app *application.Application, status *status.Status, wg *sync.WaitGroup
 }
 
 type Status struct {
-	Name string  `json:"name"`
-	Pid          int `json:"pid"`
-	Code         int `json:"code"`
-	StartupError string `json:"error"`
-	State        string `json:"state"`
-	StdOut  []string  `json:"stdout"`
-	StdErr  []string  `json:"stderr"`
+	Name         string   `json:"name"`
+	Pid          int      `json:"pid"`
+	Code         int      `json:"code"`
+	StartupError string   `json:"error"`
+	State        string   `json:"state"`
+	StdOut       []string `json:"stdout"`
+	StdErr       []string `json:"stderr"`
 }
 
 func NewStatus(process *Process) Status {
@@ -450,20 +450,20 @@ func NewStatus(process *Process) Status {
 		errorMessage = process.GetError().Error()
 	}
 	procStatus := Status{
-		Name: process.Name,
-		Pid: process.GetPid(),
-		Code: process.GetExitCode(),
+		Name:         process.Name,
+		Pid:          process.GetPid(),
+		Code:         process.GetExitCode(),
 		StartupError: errorMessage,
-		State: states[process.GetState()],
-		StdOut: process.GetStdOut(),
-		StdErr: process.GetStdErr()}
+		State:        states[process.GetState()],
+		StdOut:       process.GetStdOut(),
+		StdErr:       process.GetStdErr()}
 	return procStatus
 }
 
 type Manager struct {
-	processes sync.Map
+	processes     sync.Map
 	mainWaitGroup *sync.WaitGroup
-	logger *logrus.Logger
+	logger        *logrus.Logger
 }
 
 func (manager *Manager) Append(process *Process) {

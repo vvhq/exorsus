@@ -1,12 +1,12 @@
 package signals
 
 import (
-	"exorsus/configuration"
-	"exorsus/logging"
-	"exorsus/process"
-	"exorsus/rest"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"github.com/vvhq/exorsus/configuration"
+	"github.com/vvhq/exorsus/logging"
+	"github.com/vvhq/exorsus/process"
+	"github.com/vvhq/exorsus/rest"
 	"os"
 	"sync"
 	"syscall"
@@ -21,27 +21,27 @@ func HandleSignals(wg *sync.WaitGroup,
 	config *configuration.Configuration,
 	logger *logrus.Logger,
 	loggerHook *logging.FileHook) {
-		for {
-			receivedSignal := <-signalChan
+	for {
+		receivedSignal := <-signalChan
+		logger.
+			WithField("source", "signals").
+			WithField("signal", receivedSignal.String()).
+			Info("Signal received")
+		if receivedSignal == syscall.SIGUSR1 {
+			handleUSR1(logger, loggerHook)
+		} else if receivedSignal == syscall.SIGHUP {
+			handleHUP(logger)
+		} else if receivedSignal == syscall.SIGINT || receivedSignal == syscall.SIGTERM {
+			handleSTOP(procManager, restService, timeout, logger)
+			wg.Done()
+			return
+		} else {
 			logger.
 				WithField("source", "signals").
-				WithField("signal", receivedSignal.String()).
+				WithField("signal", "UNHANDLED").
 				Info("Signal received")
-			if receivedSignal == syscall.SIGUSR1 {
-				handleUSR1(logger, loggerHook)
-			} else if receivedSignal == syscall.SIGHUP {
-				handleHUP(logger)
-			} else if receivedSignal == syscall.SIGINT || receivedSignal == syscall.SIGTERM {
-				handleSTOP(procManager, restService, timeout, logger)
-				wg.Done()
-				return
-			} else {
-				logger.
-					WithField("source", "signals").
-					WithField("signal", "UNHANDLED").
-					Info("Signal received")
-			}
 		}
+	}
 }
 
 func handleUSR1(logger *logrus.Logger, loggerHook *logging.FileHook) {

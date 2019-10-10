@@ -11,7 +11,7 @@ import (
 )
 
 type FileHook struct {
-	logger *logrus.Logger
+	logger       *logrus.Logger
 	lumberLogger *lumberjack.Logger
 	parentLogger *logrus.Logger
 }
