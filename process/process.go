@@ -126,7 +126,7 @@ func (process *Process) stdOutChannelHandler(channel <-chan string) {
 					WithField("process", process.Name).
 					WithField("state", process.GetState()).
 					WithField("item", item).
-					Info("Can not item from stdout channel")
+					Info("STDOUT message")
 			} else {
 				break
 			}
