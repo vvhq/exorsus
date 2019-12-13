@@ -14,14 +14,23 @@ type Environment struct {
 	Value string `json:"value"`
 }
 
+type PreStart struct {
+	Command   string `json:"command"`
+	Arguments string `json:"arguments"`
+	WorkDir   string `json:"workdir"`
+	Timeout   int    `json:"timeout"`
+}
+
 type Application struct {
 	Name        string        `json:"name"`
 	Command     string        `json:"command"`
 	Arguments   string        `json:"arguments"`
+	WorkDir     string        `json:"workdir"`
 	Timeout     int           `json:"timeout"`
 	User        string        `json:"user"`
 	Group       string        `json:"group"`
 	Environment []Environment `json:"environment"`
+	PreStart    PreStart      `json:"prestart"`
 }
 
 func (app *Application) Copy() (*Application, error) {

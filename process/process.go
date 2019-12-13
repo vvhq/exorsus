@@ -1,6 +1,7 @@
 package process
 
 import (
+	"context"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/vvhq/exorsus/application"
@@ -149,6 +150,59 @@ func (process *Process) stdErrChannelHandler(channel <-chan string) {
 	}()
 }
 
+func (process *Process) preStart(stdOutChan chan<- string) {
+	preTimeout := process.app.PreStart.Timeout
+	if preTimeout == 0 {
+		preTimeout = configuration.DefaultShutdownTimeout
+	}
+	preContext, preCancel := context.WithTimeout(context.Background(), time.Duration(preTimeout)*time.Second)
+	defer preCancel()
+	preArguments := strings.Fields(strings.TrimSpace(process.app.PreStart.Arguments))
+	preCommand := exec.CommandContext(preContext, process.app.PreStart.Command, preArguments...)
+	preCommand.Dir = process.app.PreStart.WorkDir
+	if process.findCredential() != nil {
+		process.logger.
+			WithField("source", "preprocess").
+			WithField("process", process.Name).
+			WithField("state", process.GetState()).
+			WithField("user", process.app.User).
+			WithField("group", process.app.Group).
+			Trace("Start pre process command as specific user/group")
+		preCommand.SysProcAttr = &syscall.SysProcAttr{}
+		preCommand.SysProcAttr.Credential = process.findCredential()
+	}
+	preCommand.Env = os.Environ()
+	for _, env := range process.app.Environment {
+		preCommand.Env = append(process.command.Env, fmt.Sprintf("%s=%s", env.Name, env.Value))
+	}
+	process.logger.
+		WithField("source", "preprocess").
+		WithField("path", preCommand.Path).
+		WithField("dir", preCommand.Dir).
+		WithField("args", preCommand.Args).
+		Trace("About to start pre process command")
+	preOut, preErr := preCommand.CombinedOutput()
+	if preContext.Err() == context.DeadlineExceeded {
+		process.logger.
+			WithField("source", "preprocess").
+			WithField("process", process.Name).
+			WithField("state", process.GetState()).
+			WithField("error", preContext.Err().Error()).
+			Error("Pre process command timed out")
+	}
+	if preErr != nil {
+		process.logger.
+			WithField("source", "preprocess").
+			WithField("process", process.Name).
+			WithField("state", process.GetState()).
+			WithField("error", preErr.Error()).
+			Error("Pre process command exit with non zero exit code")
+	}
+
+	stdOutChan <- strings.Join(preCommand.Args, " ")
+	stdOutChan <- strings.TrimRight(string(preOut), "\n")
+}
+
 func (process *Process) start() {
 	defer process.mainWaitGroup.Done()
 	if process.status.GetState() == status.Started {
@@ -178,6 +232,7 @@ func (process *Process) start() {
 	arguments := strings.Fields(strings.TrimSpace(process.app.Arguments))
 
 	process.command = exec.Command(process.app.Command, arguments...)
+	process.command.Dir = process.app.WorkDir
 
 	if process.findCredential() != nil {
 		process.logger.
@@ -222,6 +277,17 @@ func (process *Process) start() {
 		process.pipe2Channel(stdErrPipe, stdErrChan)
 		process.stdErrChannelHandler(stdErrChan)
 	}
+
+	if process.app.PreStart.Command != "" {
+		process.preStart(stdOutChan)
+	}
+
+	process.logger.
+		WithField("source", "process").
+		WithField("path", process.command.Path).
+		WithField("dir", process.command.Dir).
+		WithField("args", process.command.Args).
+		Trace("About to start command")
 
 	err = process.command.Start()
 	if err != nil {
